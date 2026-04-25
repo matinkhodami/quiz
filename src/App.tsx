@@ -5,6 +5,7 @@ import Loader from "./components/loader";
 import Error from "./components/error";
 import { StartScreen } from "./components/start-screen";
 import { Question } from "./components/question";
+import { QuestionProgress } from "./components/question-progress";
 
 export interface Question {
   question: string;
@@ -76,7 +77,7 @@ function reducer(state: StateType, action: Action): StateType {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { questions, status, index, answer } = state;
+  const { questions, status, index, answer, points } = state;
   useEffect(() => {
     async function getQuestions() {
       try {
@@ -91,6 +92,9 @@ function App() {
     getQuestions();
   }, []);
   const numOfQuestions = questions.length;
+  const totalPoints = questions.reduce((acc, question) => {
+    return acc + question.points;
+  }, 0);
   return (
     <div className="h-screen bg-darkest flex flex-col gap-8 items-center-safe">
       <Header />
@@ -104,16 +108,24 @@ function App() {
           />
         )}
         {status === "ACTIVE" && (
-          <Question
-            question={questions[index]}
-            onSetAnswer={(answer: number) => {
-              dispatch({ type: "ANSWER", payload: answer });
-            }}
-            onNextQuestion={() => {
-              dispatch({ type: "NEXT_QUESTION" });
-            }}
-            currentAnswer={answer}
-          />
+          <>
+            <QuestionProgress
+              totalQuestions={numOfQuestions}
+              totalPoints={totalPoints}
+              currentPoints={points}
+              currentQuestion={index}
+            />
+            <Question
+              question={questions[index]}
+              onSetAnswer={(answer: number) => {
+                dispatch({ type: "ANSWER", payload: answer });
+              }}
+              onNextQuestion={() => {
+                dispatch({ type: "NEXT_QUESTION" });
+              }}
+              currentAnswer={answer}
+            />
+          </>
         )}
       </Main>
     </div>
