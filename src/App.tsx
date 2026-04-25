@@ -24,12 +24,14 @@ interface StateType {
   status: "LOADING" | "ERROR" | "READY" | "ACTIVE" | "FINISHED";
   index: number;
   answer: number | null;
+  points: number;
 }
 const initialState: StateType = {
   questions: [],
   status: "LOADING",
   index: 0,
   answer: null,
+  points: 0,
 };
 
 function reducer(state: StateType, action: Action): StateType {
@@ -48,9 +50,14 @@ function reducer(state: StateType, action: Action): StateType {
         status: "ERROR",
       };
     case "ANSWER":
+      const isCorrect =
+        state.questions[state.index].correctOption === state.answer;
       return {
         ...state,
         answer: action.payload,
+        points: isCorrect
+          ? state.points + state.questions[state.index].points
+          : state.points,
       };
     case "RESET":
       return initialState;
