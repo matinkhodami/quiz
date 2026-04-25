@@ -46,7 +46,7 @@ function reducer(state: StateType, action: Action): StateType {
     case "DATA_RECEIVED":
       return {
         ...state,
-        questions: action.payload,
+        questions: action.payload.slice(10),
         status: "READY",
       };
     case "START":
@@ -88,7 +88,12 @@ function reducer(state: StateType, action: Action): StateType {
         status: "FINISHED",
       };
     case "RESET":
-      return initialState;
+      return {
+        ...initialState,
+        highestScore: state.highestScore,
+        status: "ACTIVE",
+        questions: state.questions,
+      };
     default:
       return state;
   }
@@ -156,6 +161,9 @@ function App() {
             userPoints={points}
             totalPoints={totalPoints}
             highestScore={highestScore}
+            onReset={() => {
+              dispatch({ type: "RESET" });
+            }}
           />
         )}
       </Main>
