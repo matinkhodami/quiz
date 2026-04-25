@@ -1,8 +1,12 @@
-import { useEffect, useReducer, useState } from "react";
-import Header from "./components/Header";
-import Main from "./components/Main";
+import { useEffect, useReducer } from "react";
+import Header from "./components/header";
+import Main from "./components/main";
+import Loader from "./components/loader";
+import Error from "./components/error";
+import { StartScreen } from "./components/start-screen";
+import { Question } from "./components/question";
 
-interface Question {
+export interface Question {
   question: string;
   options: string[];
   correctOption: number;
@@ -11,24 +15,30 @@ interface Question {
 type Action =
   | { type: "RESET" }
   | { type: "DATA_RECEIVED"; payload: Question[] }
-  | { type: "DATA_FAILED" };
+  | { type: "DATA_FAILED" }
+  | { type: "START" };
 
 interface StateType {
   questions: Question[];
   status: "LOADING" | "ERROR" | "READY" | "ACTIVE" | "FINISHED";
+  index: number;
 }
 const initialState: StateType = {
   questions: [],
   status: "LOADING",
+  index: 0,
 };
 
 function reducer(state: StateType, action: Action): StateType {
   switch (action.type) {
     case "DATA_RECEIVED":
       return {
+        ...state,
         questions: action.payload,
         status: "READY",
       };
+    case "START":
+      return { ...state, status: "ACTIVE" };
     case "DATA_FAILED":
       return {
         ...state,
@@ -43,7 +53,7 @@ function reducer(state: StateType, action: Action): StateType {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { questions, status } = state;
+  const { questions, status, index } = state;
   useEffect(() => {
     async function getQuestions() {
       try {
@@ -57,13 +67,20 @@ function App() {
     }
     getQuestions();
   }, []);
-  const totalQuestions = questions.length;
+  const numOfQuestions = questions.length;
   return (
-    <div className="flex flex-col justify-center-safe items-center-safe">
+    <div className="h-screen bg-darkest flex flex-col gap-8 items-center-safe">
       <Header />
       <Main>
-        <p>1/{totalQuestions}</p>
-        <p>Question</p>
+        {status === "LOADING" && <Loader />}
+        {status === "ERROR" && <Error />}
+        {status === "READY" && (
+          <StartScreen
+            numOfQuestions={numOfQuestions}
+            onStart={() => dispatch({ type: "START" })}
+          />
+        )}
+        {status === "ACTIVE" && <Question question={questions[index]} />}
       </Main>
     </div>
   );
