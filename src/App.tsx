@@ -53,7 +53,7 @@ function reducer(state: StateType, action: Action): StateType {
       };
     case "ANSWER":
       const isCorrect =
-        state.questions[state.index].correctOption === state.answer;
+        state.questions[state.index].correctOption === action.payload;
       return {
         ...state,
         answer: action.payload,
@@ -113,7 +113,7 @@ function App() {
               totalQuestions={numOfQuestions}
               totalPoints={totalPoints}
               currentPoints={points}
-              currentQuestion={index}
+              currentQuestion={index + 1}
             />
             <Question
               question={questions[index]}
