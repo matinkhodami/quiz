@@ -6,6 +6,7 @@ import Error from "./components/error";
 import { StartScreen } from "./components/start-screen";
 import { Question } from "./components/question";
 import { QuestionProgress } from "./components/question-progress";
+import { FinishScreen } from "./components/finish-screen";
 
 export interface Question {
   question: string;
@@ -19,7 +20,9 @@ type Action =
   | { type: "DATA_FAILED" }
   | { type: "START" }
   | { type: "ANSWER"; payload: number }
-  | { type: "NEXT_QUESTION" };
+  | { type: "NEXT_QUESTION" }
+  | { type: "SET_HIGHSCORE"; payload: number }
+  | { type: "RESULT" };
 
 interface StateType {
   questions: Question[];
@@ -27,6 +30,7 @@ interface StateType {
   index: number;
   answer: number | null;
   points: number;
+  highestScore: number;
 }
 const initialState: StateType = {
   questions: [],
@@ -34,6 +38,7 @@ const initialState: StateType = {
   index: 0,
   answer: null,
   points: 0,
+  highestScore: 0,
 };
 
 function reducer(state: StateType, action: Action): StateType {
@@ -68,6 +73,20 @@ function reducer(state: StateType, action: Action): StateType {
         index: hasAnswer ? state.index + 1 : state.index,
         answer: hasAnswer ? null : state.answer,
       };
+    case "SET_HIGHSCORE":
+      const highScore =
+        state.highestScore > action.payload
+          ? state.highestScore
+          : action.payload;
+      return {
+        ...state,
+        highestScore: highScore,
+      };
+    case "RESULT":
+      return {
+        ...state,
+        status: "FINISHED",
+      };
     case "RESET":
       return initialState;
     default:
@@ -77,7 +96,7 @@ function reducer(state: StateType, action: Action): StateType {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { questions, status, index, answer, points } = state;
+  const { questions, status, index, answer, points, highestScore } = state;
   useEffect(() => {
     async function getQuestions() {
       try {
@@ -124,8 +143,20 @@ function App() {
                 dispatch({ type: "NEXT_QUESTION" });
               }}
               currentAnswer={answer}
+              isLast={index + 1 === numOfQuestions}
+              onFinish={() => {
+                dispatch({ type: "RESULT" });
+                dispatch({ type: "SET_HIGHSCORE", payload: points });
+              }}
             />
           </>
+        )}
+        {status === "FINISHED" && (
+          <FinishScreen
+            userPoints={points}
+            totalPoints={totalPoints}
+            highestScore={highestScore}
+          />
         )}
       </Main>
     </div>

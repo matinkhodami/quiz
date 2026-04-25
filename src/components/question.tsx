@@ -6,13 +6,17 @@ interface Props {
   question: Question;
   onSetAnswer: (answer: number) => void;
   onNextQuestion: () => void;
+  onFinish: () => void;
   currentAnswer: number | null;
+  isLast: boolean;
 }
 export function Question({
   question,
   onSetAnswer,
   currentAnswer,
   onNextQuestion,
+  onFinish,
+  isLast,
 }: Props) {
   return (
     <div className="flex flex-col max-w-100 mx-auto! gap-6">
@@ -27,9 +31,9 @@ export function Question({
         <ShakeButton
           className="ml-auto!"
           disable={currentAnswer === null}
-          onClick={onNextQuestion}
+          onClick={isLast ? onFinish : onNextQuestion}
         >
-          Next
+          {isLast ? "Result" : "Next"}
         </ShakeButton>
       </div>
     </div>
