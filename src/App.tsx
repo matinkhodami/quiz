@@ -17,7 +17,8 @@ type Action =
   | { type: "DATA_RECEIVED"; payload: Question[] }
   | { type: "DATA_FAILED" }
   | { type: "START" }
-  | { type: "ANSWER"; payload: number };
+  | { type: "ANSWER"; payload: number }
+  | { type: "NEXT_QUESTION" };
 
 interface StateType {
   questions: Question[];
@@ -58,6 +59,13 @@ function reducer(state: StateType, action: Action): StateType {
         points: isCorrect
           ? state.points + state.questions[state.index].points
           : state.points,
+      };
+    case "NEXT_QUESTION":
+      const hasAnswer = state.answer !== null;
+      return {
+        ...state,
+        index: hasAnswer ? state.index + 1 : state.index,
+        answer: hasAnswer ? null : state.answer,
       };
     case "RESET":
       return initialState;
@@ -100,6 +108,9 @@ function App() {
             question={questions[index]}
             onSetAnswer={(answer: number) => {
               dispatch({ type: "ANSWER", payload: answer });
+            }}
+            onNextQuestion={() => {
+              dispatch({ type: "NEXT_QUESTION" });
             }}
             currentAnswer={answer}
           />
