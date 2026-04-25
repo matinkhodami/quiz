@@ -7,6 +7,9 @@ import { StartScreen } from "./components/start-screen";
 import { Question } from "./components/question";
 import { QuestionProgress } from "./components/question-progress";
 import { FinishScreen } from "./components/finish-screen";
+import { useTimer } from "./hooks/use-timer";
+
+const SECS_PER_QUESTION = 30;
 
 export interface Question {
   question: string;
@@ -46,7 +49,7 @@ function reducer(state: StateType, action: Action): StateType {
     case "DATA_RECEIVED":
       return {
         ...state,
-        questions: action.payload.slice(10),
+        questions: action.payload,
         status: "READY",
       };
     case "START":
@@ -102,12 +105,14 @@ function reducer(state: StateType, action: Action): StateType {
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { questions, status, index, answer, points, highestScore } = state;
+  const [time, setTime] = useTimer(null);
   useEffect(() => {
     async function getQuestions() {
       try {
         const response = await fetch("http://localhost:8000/questions");
         const data = await response.json();
         dispatch({ type: "DATA_RECEIVED", payload: data });
+        setTime(Math.floor((data.length * SECS_PER_QUESTION)));
       } catch (error) {
         dispatch({ type: "DATA_FAILED" });
         console.error("ERROR(WHILE FETCH QUESTIONS): ", error);
@@ -153,6 +158,7 @@ function App() {
                 dispatch({ type: "RESULT" });
                 dispatch({ type: "SET_HIGHSCORE", payload: points });
               }}
+              time={time}
             />
           </>
         )}

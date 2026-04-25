@@ -19,6 +19,7 @@ export function Options({
     <div className="w-full flex flex-col gap-2">
       {options.map((option, index) => (
         <button
+          key={option}
           className={cn(
             defaultButtonStyle,
             hasAnswer &&

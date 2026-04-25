@@ -8,12 +8,12 @@ interface ShakeButtonProps {
   disable: boolean;
 }
 
-const ShakeButton: React.FC<ShakeButtonProps> = ({
+function ShakeButton({
   children,
   disable,
   onClick,
   className = "",
-}) => {
+}: ShakeButtonProps) {
   const [isShaking, setIsShaking] = useState(false);
 
   return (
@@ -29,7 +29,7 @@ const ShakeButton: React.FC<ShakeButtonProps> = ({
         }
       }}
       className={cn(
-        "px-4! py-2! bg-dark rounded-full font-semibold transition-colors duration-200 inset-shadow-sm inset-shadow-medium/20",
+        "px-6! py-2! bg-dark rounded-full font-semibold transition-colors duration-200 inset-shadow-sm inset-shadow-medium/20",
         disable
           ? "cursor-not-allowed text-medium opacity-60"
           : "cursor-pointer text-light!",
@@ -40,6 +40,6 @@ const ShakeButton: React.FC<ShakeButtonProps> = ({
       {children}
     </button>
   );
-};
+}
 
 export default ShakeButton;
