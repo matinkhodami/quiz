@@ -16,17 +16,20 @@ type Action =
   | { type: "RESET" }
   | { type: "DATA_RECEIVED"; payload: Question[] }
   | { type: "DATA_FAILED" }
-  | { type: "START" };
+  | { type: "START" }
+  | { type: "ANSWER"; payload: number };
 
 interface StateType {
   questions: Question[];
   status: "LOADING" | "ERROR" | "READY" | "ACTIVE" | "FINISHED";
   index: number;
+  answer: number | null;
 }
 const initialState: StateType = {
   questions: [],
   status: "LOADING",
   index: 0,
+  answer: null,
 };
 
 function reducer(state: StateType, action: Action): StateType {
@@ -44,6 +47,11 @@ function reducer(state: StateType, action: Action): StateType {
         ...state,
         status: "ERROR",
       };
+    case "ANSWER":
+      return {
+        ...state,
+        answer: action.payload,
+      };
     case "RESET":
       return initialState;
     default:
@@ -53,7 +61,7 @@ function reducer(state: StateType, action: Action): StateType {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { questions, status, index } = state;
+  const { questions, status, index, answer } = state;
   useEffect(() => {
     async function getQuestions() {
       try {
@@ -80,7 +88,15 @@ function App() {
             onStart={() => dispatch({ type: "START" })}
           />
         )}
-        {status === "ACTIVE" && <Question question={questions[index]} />}
+        {status === "ACTIVE" && (
+          <Question
+            question={questions[index]}
+            onSetAnswer={(answer: number) => {
+              dispatch({ type: "ANSWER", payload: answer });
+            }}
+            currentAnswer={answer}
+          />
+        )}
       </Main>
     </div>
   );
